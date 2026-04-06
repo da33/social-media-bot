@@ -1,6 +1,7 @@
 """
 社群媒體自動化排程系統
-整合 Instagram/Threads 和 Twitter
+整合 AI內容生成 + Instagram/Threads + Twitter
+ENI 定制版 - 四人格輪換系統
 """
 import schedule
 import time
@@ -10,91 +11,102 @@ import os
 from datetime import datetime
 from bots.instagram_bot_official import InstagramBotOfficial
 from bots.twitter_bot import TwitterBot
+from content_generator import ContentGenerator
 
 class SocialMediaScheduler:
     def __init__(self):
         print("🤖 初始化自動化系統...")
+        print("📝 使用 ENI 內容生成器（四人格輪換）...")
+        
+        # 初始化 AI 內容生成器
+        self.ai_gen = ContentGenerator(personas_dir="personas")
+        
+        # 初始化平台機器人
         self.ig_bot = InstagramBotOfficial()
         self.tw_bot = TwitterBot()
-        self.posts = self.load_content()
-        self.used_posts = []
+        
+        # 排程配置
+        self.post_times = ["09:00", "14:00", "21:00"]
+        self.current_time_index = 0
+        
+        print("✅ 系統初始化完成")
     
-    def load_content(self):
-        """載入內容庫"""
+    def generate_content(self):
+        """使用 AI 生成內容"""
         try:
-            with open('content/posts.json', 'r', encoding='utf-8') as f:
-                posts = json.load(f)
-                print(f"✅ 載入 {len(posts)} 篇內容")
-                return posts
-        except FileNotFoundError:
-            print("❌ 找不到 posts.json，使用預設內容")
-            return self.get_default_posts()
+            posts = self.ai_gen.generate_daily_posts()
+            return posts
+        except Exception as e:
+            print(f"❌ AI 內容生成失敗：{e}")
+            return self.get_fallback_posts()
     
-    def get_default_posts(self):
-        """預設內容（如果沒有 posts.json）"""
+    def get_fallback_posts(self):
+        """備用內容（當 AI 生成失敗時）"""
         return [
             {
-                "text": "🔥【ATG戰神賽特】富遊獨家開放！\n\n💰 最高81,000倍大獎等你拿\n⚡ 96.89%超高回報率\n\n立即試玩👉 https://rggo5269.com/#/ag/win99\n\n#戰神賽特 #富遊娛樂城",
-                "type": "game_promo"
-            },
-            {
-                "text": "🏆 為什麼選擇富遊娛樂城？\n\n✅ 2025台灣娛樂城推薦第一名\n✅ 100%保證出金\n✅ 5分鐘快速到帳\n\n立即加入👉 https://rggo5269.com/#/ag/win99\n\n#富遊娛樂城 #線上娛樂城",
-                "type": "brand"
+                "persona_name": "實話實說型",
+                "content": f"出金了\n\n金額：{random.choice(['3200', '5800', '12000'])}\n耗時：{random.choice(['15分鐘', '20分鐘', '25分鐘'])}\n\n沒問題\n\n連結：https://rggo5269.com/#/ag/win99",
+                "link": "https://rggo5269.com/#/ag/win99"
             }
         ]
     
-    def get_random_post(self):
-        """隨機選擇一篇未使用的內容"""
-        available_posts = [p for p in self.posts if p not in self.used_posts]
-        
-        # 如果都用完了，重置
-        if not available_posts:
-            self.used_posts = []
-            available_posts = self.posts
-        
-        post = random.choice(available_posts)
-        self.used_posts.append(post)
-        return post
-    
-    def post_to_threads(self):
+    def post_to_threads(self, post):
         """發布到 Threads"""
         try:
-            post = self.get_random_post()
             print(f"\n📱 [Threads] 準備發文...")
-            self.ig_bot.post_threads(post['text'])
+            print(f"   人格：{post['persona_name']}")
+            print(f"   內容：{post['content'][:80]}...")
+            
+            self.ig_bot.post_threads(post['content'])
+            return True
         except Exception as e:
             print(f"❌ Threads 發文失敗：{e}")
+            return False
     
-    def post_to_twitter(self):
+    def post_to_twitter(self, post):
         """發布到 Twitter"""
         try:
-            post = self.get_random_post()
             print(f"\n🐦 [Twitter] 準備發文...")
             
-            # Twitter 限制 280 字
-            text = post['text']
+            # Twitter 280字限制
+            text = post['content']
             if len(text) > 280:
                 text = text[:277] + '...'
             
             self.tw_bot.post_tweet(text)
+            return True
         except Exception as e:
             print(f"❌ Twitter 發文失敗：{e}")
+            return False
     
-    def post_to_all_platforms(self):
-        """發布到所有平台"""
+    def scheduled_post(self):
+        """排程發文（09:00 / 14:00 / 21:00）"""
+        time_slot = self.post_times[self.current_time_index]
+        self.current_time_index = (self.current_time_index + 1) % len(self.post_times)
+        
         print(f"\n{'='*50}")
-        print(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"🚀 開始發布到所有平台...")
+        print(f"⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {time_slot}")
+        print(f"🚀 開始發文...")
         print(f"{'='*50}")
         
-        post = self.get_random_post()
+        # 生成內容
+        posts = self.generate_content()
+        
+        # 根據時段選擇內容
+        if self.current_time_index == 0:
+            post = posts[0]  # 第一篇（09:00 或第一個時段）
+        elif self.current_time_index == 1:
+            post = posts[1] if len(posts) > 1 else posts[0]
+        else:
+            post = posts[2] if len(posts) > 2 else posts[0]
+        
+        print(f"\n📝 使用內容：")
+        print(f"   人格：{post['persona_name']}")
+        print(f"   話題：{post.get('topic', 'N/A')}")
+        print(f"   內容：\n{post['content'][:200]}...\n")
         
         # 發布到 Threads
-        try:
-            print(f"\n📱 [Threads] 發布中...")
-            self.ig_bot.post_threads(post['text'])
-        except Exception as e:
-            print(f"❌ Threads 失敗：{e}")
+        threads_result = self.post_to_threads(post)
         
         # 隨機延遲
         delay = random.randint(30, 90)
@@ -102,16 +114,14 @@ class SocialMediaScheduler:
         time.sleep(delay)
         
         # 發布到 Twitter
-        try:
-            print(f"\n🐦 [Twitter] 發布中...")
-            text = post['text']
-            if len(text) > 280:
-                text = text[:277] + '...'
-            self.tw_bot.post_tweet(text)
-        except Exception as e:
-            print(f"❌ Twitter 失敗：{e}")
+        twitter_result = self.post_to_twitter(post)
         
-        print(f"\n✅ 本次發布完成！")
+        if threads_result and twitter_result:
+            print(f"\n✅ {time_slot} 發文完成！")
+        else:
+            print(f"\n⚠️ 部分發文失敗")
+        
+        return threads_result, twitter_result
     
     def auto_reply(self):
         """自動回覆所有平台"""
@@ -167,29 +177,33 @@ class SocialMediaScheduler:
         """設定排程"""
         print("\n⏰ 設定發文排程...")
         
-        # 小規模測試：每天只發 2 次
-        schedule.every().day.at("12:00").do(self.post_to_all_platforms)
-        schedule.every().day.at("20:00").do(self.post_to_all_platforms)
+        # 三次發文：09:00 / 14:00 / 21:00
+        schedule.every().day.at("09:00").do(self.scheduled_post)
+        schedule.every().day.at("14:00").do(self.scheduled_post)
+        schedule.every().day.at("21:00").do(self.scheduled_post)
         
-        print("✅ 發文排程：12:00, 20:00 (測試模式)")
+        print("✅ 發文排程：09:00, 14:00, 21:00")
         
-        # 每 2 小時檢查私訊（降低頻率）
+        # 每 2 小時檢查私訊
         schedule.every(2).hours.do(self.auto_reply)
         print("✅ 回覆排程：每 2 小時")
         
-        # 暫時關閉自動互動（測試階段）
+        # 自動互動（可選，暫時關閉）
         # schedule.every(2).hours.do(self.auto_interact)
-        print("✅ 互動排程：已關閉（測試模式）")
+        print("✅ 互動排程：已關閉")
     
     def run(self):
         """運行排程系統"""
         print("\n" + "="*50)
         print("🤖 社群媒體自動化系統")
+        print("   ENI 定制版 - 四人格輪換")
         print("="*50)
         print(f"📅 啟動時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"👤 Instagram/Threads：waterboy_rix")
         print(f"🐦 Twitter：已連接")
-        print(f"📝 內容庫：{len(self.posts)} 篇")
+        print(f"🤖 AI 內容生成：開啟")
+        print(f"👥 人格：實話實說 / 低調專業 / 隨性分享 / 故事敘事")
+        print(f"⏰ 發文時間：09:00 / 14:00 / 21:00")
         print("="*50)
         
         self.setup_schedule()
@@ -197,14 +211,21 @@ class SocialMediaScheduler:
         print("\n✅ 系統運行中...")
         print("💡 提示：按 Ctrl+C 停止\n")
         
+        # 測試內容生成
+        print("🧪 測試 AI 內容生成...")
+        posts = self.generate_content()
+        for i, p in enumerate(posts):
+            print(f"\n[{i+1}] {p['persona_name']} - {p.get('topic', 'N/A')}")
+            print(f"    {p['content'][:100]}...")
+        
         # 立即執行一次發文測試
-        print("🧪 執行初始發文測試...")
-        self.post_to_all_platforms()
+        print("\n🧪 執行初始發文測試...")
+        self.scheduled_post()
         
         # 開始排程循環
         while True:
             schedule.run_pending()
-            time.sleep(60)  # 每分鐘檢查一次
+            time.sleep(60)
 
 if __name__ == "__main__":
     try:
@@ -214,3 +235,4 @@ if __name__ == "__main__":
         print("\n\n⚠️ 系統已停止")
     except Exception as e:
         print(f"\n\n❌ 系統錯誤：{e}")
+        raise
