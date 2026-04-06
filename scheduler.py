@@ -1,6 +1,6 @@
 """
 社群媒體自動化排程系統
-整合 AI內容生成 + Instagram/Threads + AI生成圖片
+整合 AI內容生成 + Instagram + Threads + AI生成圖片
 ENI 定制版 - 四人格輪換系統
 """
 import schedule
@@ -9,17 +9,21 @@ import random
 import os
 from datetime import datetime
 from content_generator import AIContentGenerator
+from bots.instagram_bot_official import InstagramBotOfficial
 from instagram_client import InstagramPublisher
 
 class SocialMediaScheduler:
     def __init__(self):
         print("🤖 初始化自動化系統...")
-        print("📝 使用 ENI 內容生成器（四人格輪換 + AI 圖片）...")
+        print("📝 ENI 四人格輪換 + AI 圖片系統")
         
         # 初始化 AI 內容生成器
         self.ai_gen = AIContentGenerator(personas_dir="personas")
         
-        # 初始化 IG 發布器
+        # 初始化 Threads 發布器（原本的）
+        self.threads_bot = InstagramBotOfficial()
+        
+        # 初始化 IG 發布器（新的 AI 圖片版）
         self.ig_publisher = InstagramPublisher()
         
         # 排程配置
@@ -48,28 +52,34 @@ class SocialMediaScheduler:
         ]
     
     def post_to_threads(self, post):
-        """發布到 Threads"""
+        """發布到 Threads（純文字）"""
         try:
             print(f"\n📱 [Threads] 準備發文...")
             print(f"   人格：{post['persona_name']}")
             print(f"   內容：{post['content'][:80]}...")
             
-            # TODO: 串接 Threads API
-            # 目前 Threads API 需要 OAuth，這裡先略過
-            print(f"   ⚠️ Threads API 串接待完成")
-            return True
+            # 直接發送純文字
+            result = self.threads_bot.post_threads(post['content'])
+            
+            if result:
+                print(f"✅ Threads 發文成功！ID: {result}")
+                return True
+            else:
+                print("❌ Threads 發文失敗")
+                return False
+                
         except Exception as e:
             print(f"❌ Threads 發文失敗：{e}")
             return False
     
     def post_to_ig(self, post):
-        """發布到 Instagram（帶 AI 生成的圖片）"""
+        """發布到 Instagram（AI 生成的圖片）"""
         try:
             print(f"\n📸 [Instagram] 準備發文...")
             print(f"   人格：{post['persona_name']}")
             print(f"   內容：{post['content'][:80]}...")
             
-            # 組合 caption（不加連結，避免被 IG 審查）
+            # 組合 caption
             caption = post['content']
             
             # 使用 AI 生成圖片並發布
@@ -125,8 +135,10 @@ class SocialMediaScheduler:
         
         if threads_result and ig_result:
             print(f"\n✅ {time_slot} 發文完成！")
+        elif threads_result or ig_result:
+            print(f"\n⚠️ 部分發文成功")
         else:
-            print(f"\n⚠️ 部分發文失敗")
+            print(f"\n❌ 發文全部失敗")
         
         return threads_result, ig_result
     
@@ -148,9 +160,9 @@ class SocialMediaScheduler:
         print("   ENI 定制版 - 四人格 + AI 圖片")
         print("="*50)
         print(f"📅 啟動時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"📸 Instagram：AI 生成圖片 + 自動發文")
-        print(f"📱 Threads：純文字發文")
-        print(f"🤖 AI 內容生成：開啟")
+        print(f"📱 Threads：純文字發文 ✅")
+        print(f"📸 Instagram：AI 生成圖片 + 發文 ✅")
+        print(f"🤖 AI 內容生成：MiniMax M2.7 ✅")
         print(f"👥 人格：實話實說 / 低調專業 / 隨性分享 / 故事敘事")
         print(f"⏰ 發文時間：09:00 / 14:00 / 21:00")
         print("="*50)
@@ -166,11 +178,6 @@ class SocialMediaScheduler:
         for i, p in enumerate(posts):
             print(f"\n[{i+1}] {p['persona_name']} - {p.get('topic', 'N/A')}")
             print(f"    {p['content'][:100]}...")
-        
-        # 測試 IG 發文（可選）
-        print("\n🧪 測試 IG AI 圖片發文...")
-        print("（這會真的發文到 Instagram，確認串接正常）")
-        # self.test_ig_post()
         
         # 開始排程循環
         while True:
