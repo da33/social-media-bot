@@ -167,22 +167,19 @@ class SocialMediaScheduler:
         """設定排程"""
         print("\n⏰ 設定發文排程...")
         
-        # 每天發文 5 次
-        schedule.every().day.at("09:00").do(self.post_to_all_platforms)
+        # 小規模測試：每天只發 2 次
         schedule.every().day.at("12:00").do(self.post_to_all_platforms)
-        schedule.every().day.at("15:00").do(self.post_to_all_platforms)
         schedule.every().day.at("20:00").do(self.post_to_all_platforms)
-        schedule.every().day.at("23:00").do(self.post_to_all_platforms)
         
-        print("✅ 發文排程：09:00, 12:00, 15:00, 20:00, 23:00")
+        print("✅ 發文排程：12:00, 20:00 (測試模式)")
         
-        # 每 30 分鐘檢查私訊
-        schedule.every(30).minutes.do(self.auto_reply)
-        print("✅ 回覆排程：每 30 分鐘")
+        # 每 2 小時檢查私訊（降低頻率）
+        schedule.every(2).hours.do(self.auto_reply)
+        print("✅ 回覆排程：每 2 小時")
         
-        # 每 2 小時互動一次
-        schedule.every(2).hours.do(self.auto_interact)
-        print("✅ 互動排程：每 2 小時")
+        # 暫時關閉自動互動（測試階段）
+        # schedule.every(2).hours.do(self.auto_interact)
+        print("✅ 互動排程：已關閉（測試模式）")
     
     def run(self):
         """運行排程系統"""
