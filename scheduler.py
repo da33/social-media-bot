@@ -77,13 +77,14 @@ class SocialMediaScheduler:
         try:
             print(f"\n📸 [Instagram] 準備發文...")
             print(f"   人格：{post['persona_name']}")
+            print(f"   話題：{post.get('topic', 'N/A')}")
             print(f"   內容：{post['content'][:80]}...")
             
             # 組合 caption
             caption = post['content']
             
-            # 使用 AI 生成圖片並發布
-            result = self.ig_publisher.post_with_ai_image(caption)
+            # 使用 AI 生成圖片並發布（傳入話題以生成對應圖片）
+            result = self.ig_publisher.post_with_ai_image(caption, topic=post.get('topic'))
             
             if result:
                 print(f"✅ IG 發文成功！ID: {result}")

@@ -1,5 +1,6 @@
 """
 Instagram 發布模組（支援 MiniMax AI 生成圖片）
+圖片會根據內容話題生成
 """
 import requests
 import time
@@ -15,14 +16,93 @@ class InstagramPublisher:
         self.image_gen = ImageGenerator()
         self.customer_service_link = "https://l.threads.com/?u=https%3A%2F%2Flin.ee%2FVjQOag7%3Futm_source%3Dthreads%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio"
         
-        # IG 圖片風格 prompt（富遊/RG 風格：深藍 + 金色 + 專業賭場感）
-        self.image_prompts = [
-            "Rich casino luxury theme with deep navy blue and gold colors, elegant slot machine, golden coins scatter, professional online gaming atmosphere, digital art, 4:5 aspect ratio",
-            "Modern online entertainment platform with blue and gold branding, casino elements, sophisticated gambling setup, premium feel, digital art, 4:5 aspect ratio",
-            "Luxurious casino night atmosphere with deep blue background and gold accents, slot machine reels spinning, elegant gold decorations, high-end gambling vibe, digital art, 4:5",
-            "Professional gaming platform aesthetic with rich blue and gold color scheme, elegant casino chips and cards, luxurious yet trustworthy atmosphere, digital art, 4:5",
-            "Sleek casino entertainment design with navy blue and gold theme, golden light effects, modern gambling atmosphere, premium online gaming style, digital art, 4:5",
+        # 根據話題對應的圖片風格（富遊/RG 風格：深藍 + 金色）
+        self.topic_image_prompts = {
+            "出金紀錄": [
+                "Gold coins spilling from slot machine, deep navy blue background, luxurious casino atmosphere, golden light effects, professional digital art, 4:5 aspect ratio",
+                "Person withdrawing money from ATM at casino, gold coins scattered around, deep blue and gold color theme, professional digital art, 4:5",
+            ],
+            "出金速度": [
+                "Clock with gold coins, fast forward concept, deep navy blue background, casino theme, time pressure visualization, digital art, 4:5",
+                "Speed meter with golden needle, casino luxury background, deep blue and gold theme, fast withdrawal concept, digital art, 4:5",
+            ],
+            "出金頻率": [
+                "Calendar with gold coins, monthly schedule concept, deep navy blue background, casino elements, professional digital art, 4:5",
+                "Wallet filling with gold coins, recurring income concept, deep blue and gold branding, casino luxury feel, digital art, 4:5",
+            ],
+            "出金": [
+                "Gold coins and banknote, casino wealth concept, deep navy blue and gold theme, professional digital art, 4:5 aspect ratio",
+                "Slot machine paying out gold coins, casino winning moment, deep blue background with golden glow, digital art, 4:5",
+            ],
+            "風險提醒": [
+                "Person thinking carefully at casino, blue mood lighting, gold accents, responsible gambling theme, digital art, 4:5",
+                "Warning sign with gold coins, careful gambling concept, deep navy blue background, professional warning atmosphere, digital art, 4:5",
+            ],
+            "心態分享": [
+                "Person relaxing at home peacefully, smartphone showing casino app, cozy blue evening atmosphere, gold accents, digital art, 4:5",
+                "Calm meditation pose with casino chips, balance lifestyle concept, deep blue and gold theme, peaceful gambling mindset, digital art, 4:5",
+            ],
+            "風控觀念": [
+                "Calculator with casino chips, budget planning concept, deep navy blue background, gold accents, professional digital art, 4:5",
+                "Piggy bank with gold coins, savings concept, casino theme, deep blue and gold color scheme, digital art, 4:5",
+            ],
+            "平台穩定": [
+                "Strong building with casino logo, stable platform concept, deep navy blue and gold architecture, professional digital art, 4:5",
+                "Shield with gold checkmark, verified casino platform, security concept, deep blue background, professional digital art, 4:5",
+            ],
+            "平台選擇": [
+                "Compare different casino platforms, deep blue comparison interface, gold trophy on top, professional digital art, 4:5",
+                "Finger pointing at winning platform, choice concept, deep navy blue background, gold winner spotlight, digital art, 4:5",
+            ],
+            "優惠使用": [
+                "Gift box with gold ribbon, casino bonus reward, deep navy blue background, promotional atmosphere, digital art, 4:5",
+                "Gold bonus coins with gift bow, special offer concept, deep blue and gold celebration theme, digital art, 4:5",
+            ],
+            "優惠真相": [
+                "Magnifying glass examining casino bonus terms, gold coins under examination, deep blue detective theme, professional digital art, 4:5",
+                "Scale balancing casino rewards, realistic bonus evaluation concept, deep navy blue and gold theme, professional digital art, 4:5",
+            ],
+            "新人問題": [
+                "New player entering luxury casino, confused but curious expression, deep navy blue entrance, gold door lights, welcoming digital art, 4:5",
+                "Question mark above new player head at casino, deep blue background, gold question mark, newcomer guidance concept, digital art, 4:5",
+            ],
+            "客戶疑問": [
+                "Customer service chat bubble with gold question mark, casino support concept, deep navy blue background, professional digital art, 4:5",
+                "Person asking question at casino desk, customer inquiry concept, deep blue and gold theme, professional atmosphere, digital art, 4:5",
+            ],
+            "客戶故事": [
+                "Two people at casino sharing experience, conversation story concept, deep navy blue lounge atmosphere, gold accents, digital art, 4:5",
+                "Customer testimonial scene at casino, satisfied player with thumb up, gold reward, deep blue background, professional digital art, 4:5",
+            ],
+            "日常分享": [
+                "Person casually browsing casino app at coffee shop, relaxed lifestyle concept, cozy evening atmosphere, blue and gold theme, digital art, 4:5",
+                "Casual evening at home with smartphone, entertainment lifestyle, cozy blue lighting, gold casino elements, relaxed digital art, 4:5",
+            ],
+        }
+        
+        # 通用圖片（當話題沒有對應時使用）
+        self.default_image_prompts = [
+            "Luxurious casino lifestyle, deep navy blue and gold theme, elegant gambling atmosphere, professional digital art, 4:5 aspect ratio",
+            "Modern online entertainment platform, blue and gold branding, sophisticated casino elements, premium feel, digital art, 4:5",
+            "Elegant casino night atmosphere, deep blue background with golden light, slot machine silhouette, high-end gambling vibe, digital art, 4:5",
+            "Professional gaming platform aesthetic, rich blue and gold color scheme, casino chips and cards, luxurious yet trustworthy, digital art, 4:5",
+            "Sleek casino entertainment design, navy blue and gold theme, golden light effects, modern gambling atmosphere, digital art, 4:5",
         ]
+    
+    def get_image_prompt_for_topic(self, topic):
+        """根據話題取得對應的圖片 prompt"""
+        # 嘗試找完全匹配的話題
+        for key in self.topic_image_prompts:
+            if key in topic:
+                return random.choice(self.topic_image_prompts[key])
+        
+        # 嘗試部分匹配
+        for key, prompts in self.topic_image_prompts.items():
+            if topic in key:
+                return random.choice(prompts)
+        
+        # 使用預設圖片
+        return random.choice(self.default_image_prompts)
     
     def create_media_container(self, image_url, caption):
         """建立媒體容器"""
@@ -76,13 +156,16 @@ class InstagramPublisher:
             return result["id"]
         return None
     
-    def post_with_ai_image(self, caption):
+    def post_with_ai_image(self, caption, topic=None):
         """使用 MiniMax AI 生成的圖片發文到 IG"""
-        # 隨機選擇一個圖片風格
-        prompt = random.choice(self.image_prompts)
+        # 根據話題選擇圖片 prompt
+        if topic:
+            prompt = self.get_image_prompt_for_topic(topic)
+        else:
+            prompt = random.choice(self.default_image_prompts)
         
         # 生成圖片
-        print(f"🎨 生成 IG 配圖...")
+        print(f"🎨 生成 IG 配圖（話題：{topic}）...")
         image_url = self.image_gen.generate_image(custom_prompt=prompt)
         
         if not image_url:
@@ -120,6 +203,11 @@ class InstagramPublisher:
 if __name__ == "__main__":
     client = InstagramPublisher()
     
-    test_caption = "測試 AI 圖片 IG 發文\n.\n.\n.\n#test"
-    result = client.post_with_ai_image(test_caption)
-    print(f"\n結果: {result}")
+    # 測試不同話題的圖片
+    topics = ["出金紀錄", "心態分享", "優惠使用", "風險提醒"]
+    
+    for topic in topics:
+        print(f"\n{'='*50}")
+        print(f"測試話題：{topic}")
+        prompt = client.get_image_prompt_for_topic(topic)
+        print(f"圖片 Prompt：{prompt[:80]}...")
