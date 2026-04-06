@@ -14,13 +14,13 @@ class InstagramPublisher:
         self.base_url = "https://graph.instagram.com/v18.0"
         self.image_gen = ImageGenerator()
         
-        # IG 圖片風格 prompt
+        # IG 圖片風格 prompt（富遊/RG 風格：深藍 + 金色 + 專業賭場感）
         self.image_prompts = [
-            "Luxurious casino slot machine theme with golden coins and soft warm lighting elegant atmosphere digital art style",
-            "Modern online gaming platform interface with colorful game icons and neon lights gaming setup digital art",
-            "Abstract golden patterns with luxurious casino elements and elegant geometric design digital art",
-            "A relaxing person enjoying online entertainment at home with cozy atmosphere and warm lighting digital art",
-            "Minimalist design with gold accents and simple casino theme elements modern aesthetic digital art",
+            "Rich casino luxury theme with deep navy blue and gold colors, elegant slot machine, golden coins scatter, professional online gaming atmosphere, digital art, 16:9 aspect ratio",
+            "Modern online entertainment platform with blue and gold branding, casino elements, sophisticated gambling setup, premium feel, digital art, 16:9 aspect ratio",
+            "Luxurious casino night atmosphere with deep blue background and gold accents, slot machine reels spinning, elegant gold decorations, high-end gambling vibe, digital art, 16:9",
+            "Professional gaming platform aesthetic with rich blue and gold color scheme, elegant casino chips and cards, luxurious yet trustworthy atmosphere, digital art, 16:9",
+            "Sleek casino entertainment design with navy blue and gold theme, golden light effects, modern gambling atmosphere, premium online gaming style, digital art, 16:9",
         ]
     
     def create_media_container(self, image_url, caption):
