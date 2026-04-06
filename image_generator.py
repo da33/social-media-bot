@@ -1,0 +1,96 @@
+"""
+MiniMax Image-01 圖片生成器
+"""
+import os
+import requests
+import time
+import hashlib
+from datetime import datetime
+
+class ImageGenerator:
+    def __init__(self, api_key=None):
+        self.api_key = api_key or os.getenv('MINIMAX_API_KEY')
+        self.base_url = "https://api.minimaxi.com/v1"
+        
+        # 圖片 prompt 模板（不同風格）
+        self.prompts = {
+            "casino": "A luxurious casino slot machine theme, golden coins, soft warm lighting, elegant atmosphere, digital art style, 16:9 aspect ratio",
+            "gaming": "A modern online gaming platform interface, colorful game icons, neon lights, gaming setup, digital art, 16:9 aspect ratio",
+            "lifestyle": "A person relaxing at home, enjoying online entertainment, cozy atmosphere, warm lighting, digital art style, 16:9 aspect ratio",
+            "abstract": "Abstract golden patterns, luxurious casino elements, elegant geometric design, digital art, 16:9 aspect ratio",
+            "minimal": "Minimalist design with gold accents, simple casino theme elements, modern aesthetic, digital art, 16:9 aspect ratio",
+        }
+    
+    def generate_image(self, prompt_key=None, custom_prompt=None):
+        """生成圖片並返回 URL"""
+        if custom_prompt:
+            prompt = custom_prompt
+        elif prompt_key and prompt_key in self.prompts:
+            prompt = self.prompts[prompt_key]
+        else:
+            prompt = random.choice(list(self.prompts.values()))
+        
+        try:
+            url = f"{self.base_url}/image_generation"
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            payload = {
+                "model": "image-01",
+                "prompt": prompt,
+                "aspect_ratio": "16:9",
+                "num_images": 1
+            }
+            
+            response = requests.post(url, headers=headers, json=payload, timeout=60)
+            result = response.json()
+            
+            if result.get('base_resp', {}).get('status_code') == 0:
+                image_url = result['data']['image_urls'][0]
+                print(f"✅ 圖片生成成功：{image_url[:80]}...")
+                return image_url
+            else:
+                print(f"❌ 圖片生成失敗：{result}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ 圖片生成錯誤：{e}")
+            return None
+    
+    def download_image(self, url, save_path=None):
+        """下載圖片到本地"""
+        if not save_path:
+            # 用 hash 生成檔名
+            hash_name = hashlib.md5(url.encode()).hexdigest()[:12]
+            save_path = f"generated_image_{hash_name}.jpg"
+        
+        try:
+            response = requests.get(url, timeout=30)
+            if response.status_code == 200:
+                with open(save_path, 'wb') as f:
+                    f.write(response.content)
+                print(f"✅ 圖片下載成功：{save_path}")
+                return save_path
+            else:
+                print(f"❌ 下載失敗，狀態碼：{response.status_code}")
+                return None
+        except Exception as e:
+            print(f"❌ 下載錯誤：{e}")
+            return None
+
+    def generate_and_download(self, prompt_key=None, custom_prompt=None):
+        """生成並下載圖片"""
+        url = self.generate_image(prompt_key, custom_prompt)
+        if url:
+            return self.download_image(url)
+        return None
+
+if __name__ == "__main__":
+    gen = ImageGenerator()
+    
+    print("測試圖片生成...")
+    path = gen.generate_and_download("casino")
+    print(f"\n生成的圖片路徑：{path}")
