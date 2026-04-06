@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from bots.instagram_bot_official import InstagramBotOfficial
 from bots.twitter_bot import TwitterBot
-from content_generator import ContentGenerator
+from content_generator import AIContentGenerator as ContentGenerator
 
 class SocialMediaScheduler:
     def __init__(self):
