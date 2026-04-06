@@ -9,9 +9,24 @@ import os
 
 class TwitterBot:
     def __init__(self):
-        self.api = self.authenticate()
-        self.client = self.get_client()
+        self.api = None
+        self.client = None
         self.promotion_link = 'https://rggo5269.com/#/ag/win99'
+        
+        # 檢查是否有 Twitter API 憑證
+        if self.has_credentials():
+            try:
+                self.api = self.authenticate()
+                self.client = self.get_client()
+            except Exception as e:
+                print(f"⚠️ Twitter API 未設定，跳過 Twitter 功能")
+        else:
+            print("⚠️ Twitter API 憑證未設定，跳過 Twitter 功能")
+    
+    def has_credentials(self):
+        """檢查是否有完整的 Twitter 憑證"""
+        required = ['TW_API_KEY', 'TW_API_SECRET', 'TW_ACCESS_TOKEN', 'TW_ACCESS_SECRET']
+        return all(os.getenv(key) for key in required)
     
     def authenticate(self):
         """認證 Twitter API v1.1"""
@@ -44,6 +59,10 @@ class TwitterBot:
     
     def post_tweet(self, text):
         """發布推文"""
+        if not self.client:
+            print("⚠️ Twitter 未啟用，跳過發文")
+            return None
+            
         try:
             # Twitter 限制 280 字
             if len(text) > 280:
@@ -81,6 +100,10 @@ class TwitterBot:
     
     def reply_to_mentions(self):
         """回覆提及"""
+        if not self.api:
+            print("⚠️ Twitter 未啟用，跳過回覆")
+            return
+            
         try:
             # 獲取最近的提及
             mentions = self.api.mentions_timeline(count=10)
@@ -114,6 +137,10 @@ class TwitterBot:
     
     def like_tweets(self, keyword, count=10):
         """點讚相關推文"""
+        if not self.api:
+            print("⚠️ Twitter 未啟用，跳過點讚")
+            return
+            
         try:
             tweets = self.api.search_tweets(q=keyword, count=count, lang='zh')
             
