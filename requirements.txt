@@ -1,0 +1,4 @@
+instagrapi==1.16.56
+tweepy==4.14.0
+schedule==1.2.0
+python-dotenv==1.0.0
