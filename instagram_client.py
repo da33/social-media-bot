@@ -13,14 +13,15 @@ class InstagramPublisher:
         self.account_id = account_id or os.getenv('IG_ACCOUNT_ID')
         self.base_url = "https://graph.instagram.com/v18.0"
         self.image_gen = ImageGenerator()
+        self.customer_service_link = "https://l.threads.com/?u=https%3A%2F%2Flin.ee%2FVjQOag7%3Futm_source%3Dthreads%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio"
         
         # IG 圖片風格 prompt（富遊/RG 風格：深藍 + 金色 + 專業賭場感）
         self.image_prompts = [
-            "Rich casino luxury theme with deep navy blue and gold colors, elegant slot machine, golden coins scatter, professional online gaming atmosphere, digital art, 16:9 aspect ratio",
-            "Modern online entertainment platform with blue and gold branding, casino elements, sophisticated gambling setup, premium feel, digital art, 16:9 aspect ratio",
-            "Luxurious casino night atmosphere with deep blue background and gold accents, slot machine reels spinning, elegant gold decorations, high-end gambling vibe, digital art, 16:9",
-            "Professional gaming platform aesthetic with rich blue and gold color scheme, elegant casino chips and cards, luxurious yet trustworthy atmosphere, digital art, 16:9",
-            "Sleek casino entertainment design with navy blue and gold theme, golden light effects, modern gambling atmosphere, premium online gaming style, digital art, 16:9",
+            "Rich casino luxury theme with deep navy blue and gold colors, elegant slot machine, golden coins scatter, professional online gaming atmosphere, digital art, 4:5 aspect ratio",
+            "Modern online entertainment platform with blue and gold branding, casino elements, sophisticated gambling setup, premium feel, digital art, 4:5 aspect ratio",
+            "Luxurious casino night atmosphere with deep blue background and gold accents, slot machine reels spinning, elegant gold decorations, high-end gambling vibe, digital art, 4:5",
+            "Professional gaming platform aesthetic with rich blue and gold color scheme, elegant casino chips and cards, luxurious yet trustworthy atmosphere, digital art, 4:5",
+            "Sleek casino entertainment design with navy blue and gold theme, golden light effects, modern gambling atmosphere, premium online gaming style, digital art, 4:5",
         ]
     
     def create_media_container(self, image_url, caption):
@@ -88,9 +89,12 @@ class InstagramPublisher:
             print("❌ 圖片生成失敗，跳過 IG 發文")
             return None
         
+        # 加入客服連結到 caption
+        full_caption = f"{caption}\n\n📩 有問題可私訊：{self.customer_service_link}"
+        
         # 建立容器
         print(f"📦 建立 IG 容器...")
-        container_id = self.create_media_container(image_url, caption)
+        container_id = self.create_media_container(image_url, full_caption)
         
         if not container_id:
             print("❌ 容器建立失敗")

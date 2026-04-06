@@ -15,6 +15,7 @@ class AIContentGenerator:
         self.personas_dir = personas_dir
         self.personas = self._load_personas()
         self.promotion_link = "https://rggo5269.com/#/ag/win99"
+        self.customer_service_link = "https://l.threads.com/?u=https%3A%2F%2Flin.ee%2FVjQOag7%3Futm_source%3Dthreads%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio"
         
         # MiniMax Token Plan API
         self.api_key = os.getenv('MINIMAX_API_KEY')
