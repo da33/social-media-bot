@@ -8,13 +8,13 @@ import json
 import random
 import os
 from datetime import datetime
-from bots.instagram_bot import InstagramBot
+from bots.instagram_bot_official import InstagramBotOfficial
 from bots.twitter_bot import TwitterBot
 
 class SocialMediaScheduler:
     def __init__(self):
         print("🤖 初始化自動化系統...")
-        self.ig_bot = InstagramBot()
+        self.ig_bot = InstagramBotOfficial()
         self.tw_bot = TwitterBot()
         self.posts = self.load_content()
         self.used_posts = []
@@ -61,7 +61,7 @@ class SocialMediaScheduler:
         try:
             post = self.get_random_post()
             print(f"\n📱 [Threads] 準備發文...")
-            self.ig_bot.post_thread(post['text'])
+            self.ig_bot.post_threads(post['text'])
         except Exception as e:
             print(f"❌ Threads 發文失敗：{e}")
     
@@ -92,7 +92,7 @@ class SocialMediaScheduler:
         # 發布到 Threads
         try:
             print(f"\n📱 [Threads] 發布中...")
-            self.ig_bot.post_thread(post['text'])
+            self.ig_bot.post_threads(post['text'])
         except Exception as e:
             print(f"❌ Threads 失敗：{e}")
         
