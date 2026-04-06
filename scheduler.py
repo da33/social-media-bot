@@ -173,12 +173,9 @@ class SocialMediaScheduler:
         print("\n✅ 系統運行中...")
         print("💡 提示：按 Ctrl+C 停止\n")
         
-        # 測試內容生成
-        print("🧪 測試 AI 內容生成...")
-        posts = self.generate_content()
-        for i, p in enumerate(posts):
-            print(f"\n[{i+1}] {p['persona_name']} - {p.get('topic', 'N/A')}")
-            print(f"    {p['content'][:100]}...")
+        # 啟動時立即發文測試
+        print("🚀 啟動時立即發文測試...")
+        self.scheduled_post()
         
         # 開始排程循環
         while True:
