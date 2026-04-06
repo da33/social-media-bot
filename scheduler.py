@@ -197,9 +197,9 @@ class SocialMediaScheduler:
         print("\n✅ 系統運行中...")
         print("💡 提示：按 Ctrl+C 停止\n")
         
-        # 立即執行一次測試
-        print("🧪 執行初始測試...")
-        self.auto_reply()
+        # 立即執行一次發文測試
+        print("🧪 執行初始發文測試...")
+        self.post_to_all_platforms()
         
         # 開始排程循環
         while True:
