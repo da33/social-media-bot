@@ -1,16 +1,24 @@
 """
 MiniMax Image-01 圖片生成器
+上傳到 Cloudinary 提供給 Instagram
 """
 import os
 import requests
 import time
 import hashlib
+import base64
+import random
 from datetime import datetime
 
 class ImageGenerator:
     def __init__(self, api_key=None):
         self.api_key = api_key or os.getenv('MINIMAX_API_KEY')
         self.base_url = "https://api.minimaxi.com/v1"
+        
+        # Cloudinary 設定
+        self.cloud_name = os.getenv('CLOUDINARY_CLOUD_NAME', 'dvtoqjedb')
+        self.cloudinary_api_key = os.getenv('CLOUDINARY_API_KEY', '132394465451299')
+        self.cloudinary_api_secret = os.getenv('CLOUDINARY_API_SECRET', 'bOieo35VxsC4XdKZoBB10pngmK0')
         
         # 圖片 prompt 模板（不同風格）
         self.prompts = {
@@ -45,13 +53,17 @@ class ImageGenerator:
                 "num_images": 1
             }
             
-            response = requests.post(url, headers=headers, json=payload, timeout=60)
+            response = requests.post(url, headers=headers, json=payload, timeout=120)
             result = response.json()
             
             if result.get('base_resp', {}).get('status_code') == 0:
-                image_url = result['data']['image_urls'][0]
-                print(f"✅ 圖片生成成功：{image_url[:80]}...")
-                return image_url
+                image_url = result.get('data', {}).get('image_urls', [None])[0]
+                if image_url:
+                    print(f"✅ 圖片生成成功：{image_url[:80]}...")
+                    return image_url
+                else:
+                    print(f"❌ 圖片 URL 為空：{result}")
+                    return None
             else:
                 print(f"❌ 圖片生成失敗：{result}")
                 return None
@@ -80,6 +92,39 @@ class ImageGenerator:
         except Exception as e:
             print(f"❌ 下載錯誤：{e}")
             return None
+    
+    def upload_to_cloudinary(self, local_path):
+        """上傳本地圖片到 Cloudinary，返回公開 URL"""
+        try:
+            url = f"https://api.cloudinary.com/v1_1/{self.cloud_name}/image/upload"
+            
+            timestamp = str(int(time.time()))
+            params_to_sign = f"timestamp={timestamp}"
+            signature = hashlib.sha1((params_to_sign + self.cloudinary_api_secret).encode()).hexdigest()
+            
+            with open(local_path, 'rb') as f:
+                img_data = f.read()
+            
+            payload = {
+                'file': f'data:image/jpeg;base64,{base64.b64encode(img_data).decode()}',
+                'api_key': self.cloudinary_api_key,
+                'timestamp': timestamp,
+                'signature': signature,
+            }
+            
+            response = requests.post(url, data=payload)
+            result = response.json()
+            
+            if result.get('secure_url'):
+                print(f"✅ Cloudinary 上傳成功：{result['secure_url'][:80]}...")
+                return result['secure_url']
+            else:
+                print(f"❌ Cloudinary 上傳失敗：{result}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Cloudinary 上傳錯誤：{e}")
+            return None
 
     def generate_and_download(self, prompt_key=None, custom_prompt=None):
         """生成並下載圖片"""
@@ -87,6 +132,26 @@ class ImageGenerator:
         if url:
             return self.download_image(url)
         return None
+    
+    def generate_and_upload(self, prompt_key=None, custom_prompt=None):
+        """生成圖片並上傳到 Cloudinary（給 Instagram 用）"""
+        minimax_url = self.generate_image(prompt_key, custom_prompt)
+        if not minimax_url:
+            return None
+        
+        local_path = self.download_image(minimax_url)
+        if not local_path:
+            return None
+        
+        cloudinary_url = self.upload_to_cloudinary(local_path)
+        
+        # 清理本地檔案
+        try:
+            os.remove(local_path)
+        except:
+            pass
+        
+        return cloudinary_url
 
 if __name__ == "__main__":
     gen = ImageGenerator()
