@@ -17,31 +17,76 @@ class InstagramPublisher:
         self.image_gen = ImageGenerator()
         self.customer_service_link = "https://l.threads.com/?u=https%3A%2F%2Flin.ee%2FVjQOag7%3Futm_source%3Dthreads%26utm_medium%3Dsocial%26utm_content%3Dlink_in_bio"
         
-        # 根據話題對應的圖片 prompt（保持簡單避免失敗）
+        # 根據話題對應的圖片 prompt（高品質版本）
         self.topic_image_prompts = {
-            "出金紀錄": ["Gold coins on blue background, 3:4", "Gold coins spilling, casino theme, navy blue, 3:4"],
-            "出金速度": ["Gold coins and clock, fast payout, blue theme, 3:4", "Gold coins, quick withdrawal, navy blue, 3:4"],
-            "出金頻率": ["Gold coins and calendar, regular withdrawal, blue, 3:4", "Wallet with gold coins, frequent rewards, navy blue, 3:4"],
-            "出金": ["Gold coins and chips, casino wealth, navy blue, 3:4", "Slot machine jackpot, gold coins, blue theme, 3:4"],
-            "風險提醒": ["Gold coins and warning sign, responsible gambling, blue, 3:4", "Casino chips with caution, careful gambling, navy blue, 3:4"],
-            "心態分享": ["Gold coins, relaxed gambling mindset, blue theme, 3:4", "Peaceful casino lifestyle, gold coins, navy blue, 3:4"],
-            "風控觀念": ["Gold coins and calculator, budget planning, blue, 3:4", "Piggy bank with gold coins, savings, navy blue, 3:4"],
-            "平台穩定": ["Gold coins and shield, trusted casino, blue theme, 3:4", "Verified badge gold coins, secure platform, navy blue, 3:4"],
-            "平台選擇": ["Gold trophy and coins, best casino choice, blue, 3:4", "Premium casino gold coins, top rating, navy blue, 3:4"],
-            "優惠使用": ["Gold coins and gift box, casino bonus, blue theme, 3:4", "Gift with gold coins, bonus reward, navy blue, 3:4"],
-            "優惠真相": ["Gold coins and magnifying glass, bonus truth, blue, 3:4", "Scale gold coins, fair bonus, navy blue theme, 3:4"],
-            "新人問題": ["Gold coins and question mark, new player, blue theme, 3:4", "Casino newcomer guide, gold coins, navy blue, 3:4"],
-            "客戶疑問": ["Gold coins and chat bubble, casino support, blue, 3:4", "Help desk gold coins, customer service, navy blue, 3:4"],
-            "客戶故事": ["Happy player gold coins, success story, blue theme, 3:4", "Gold coins celebration, satisfied customer, navy blue, 3:4"],
-            "日常分享": ["Casual gold coins, relaxed lifestyle, blue theme, 3:4", "Home casino gold coins, evening entertainment, navy blue, 3:4"],
+            "出金紀錄": [
+                "Elegant stack of golden coins on premium dark blue velvet background, soft studio lighting, luxury fintech aesthetic, shallow depth of field, photorealistic, 4:5 ratio",
+                "Glittering gold coins arranged in neat rows, dark navy background with subtle bokeh, professional product photography, cinematic lighting, 4:5"
+            ],
+            "出金速度": [
+                "Golden coin falling into elegant glass jar, motion blur effect, dark blue gradient background, premium finance imagery, clean composition, 4:5",
+                "Speed motion of gold coins, clock element subtly integrated, deep blue backdrop, professional photography style, 4:5"
+            ],
+            "出金頻率": [
+                "Monthly calendar with golden coins, clean minimalist design, navy blue and gold color scheme, modern fintech aesthetic, 4:5",
+                "Elegant savings jar filled with gold coins, warm soft lighting, dark blue background, professional lifestyle photography, 4:5"
+            ],
+            "出金": [
+                "Luxurious golden coins on premium dark fabric, soft spotlight, high-end casino aesthetic, photorealistic, 4:5 ratio",
+                "Stacked gold coins with subtle sparkle, dark blue gradient background, professional product shot, 4:5"
+            ],
+            "風險提醒": [
+                "Golden coins with subtle warning element, clean minimalist design, navy blue and gold palette, responsible gambling theme, professional aesthetic, 4:5",
+                "Elegant balance scale with gold coins, dark blue backdrop, professional infographic style, 4:5"
+            ],
+            "心態分享": [
+                "Peaceful person relaxing with golden coins nearby, warm ambient lighting, dark blue background, lifestyle fintech aesthetic, 4:5",
+                "Calm lifestyle scene with gold coins, soft shadows, navy blue tones, professional photography, 4:5"
+            ],
+            "風控觀念": [
+                "Golden coins in transparent safe jar, calculator nearby, clean desk setup, navy blue accent, professional finance aesthetic, 4:5",
+                "Organized budgeting scene with gold coins, minimalist design, dark blue palette, professional lifestyle, 4:5"
+            ],
+            "平台穩定": [
+                "Golden shield with checkmark, secure lock element, dark blue gradient background, trust and security theme, professional design, 4:5",
+                "Verified badge with gold coins, premium dark blue backdrop, security and reliability aesthetic, 4:5"
+            ],
+            "平台選擇": [
+                "Golden trophy surrounded by gold coins, award winning concept, dark blue background, premium casino aesthetic, 4:5",
+                "Top-rated luxury items with gold coins, ranking chart element, navy blue professional theme, 4:5"
+            ],
+            "優惠使用": [
+                "Gift box opening with golden glow, bonus reward concept, dark blue festive background, premium unboxing aesthetic, 4:5",
+                "Luxury gift with gold coins, celebration confetti subtle, navy blue palette, professional promotional style, 4:5"
+            ],
+            "優惠真相": [
+                "Magnifying glass examining golden coins, transparent truth concept, dark blue investigative background, professional aesthetic, 4:5",
+                "Balanced scale comparing gold coins, fair evaluation concept, navy blue minimalist design, 4:5"
+            ],
+            "新人問題": [
+                "Golden coins with question mark, clean educational design, dark blue friendly background, welcoming fintech aesthetic, 4:5",
+                "Help icon with gold coins, supportive design, navy blue professional palette, 4:5"
+            ],
+            "客戶疑問": [
+                "Chat bubbles with golden coins, customer support concept, dark blue modern background, professional service aesthetic, 4:5",
+                "Support desk with gold coins, friendly service scene, navy blue professional theme, 4:5"
+            ],
+            "客戶故事": [
+                "Happy lifestyle moment with gold coins, celebration subtle, dark blue warm background, professional lifestyle photography, 4:5",
+                "Success moment with golden coins, achievement concept, navy blue backdrop, premium aesthetic, 4:5"
+            ],
+            "日常分享": [
+                "Cozy evening scene with gold coins nearby, warm ambient lighting, dark blue lifestyle aesthetic, professional photography, 4:5",
+                "Relaxed lifestyle moment, gold coins as accent, navy blue modern interior, professional lifestyle, 4:5"
+            ],
         }
         
         self.default_image_prompts = [
-            "Gold coins on blue background, luxury casino, 3:4",
-            "Premium casino gold coins, sophisticated blue theme, 3:4",
-            "Elegant casino night, gold coins, deep blue, 3:4",
-            "Professional gaming, gold coins, navy blue theme, 3:4",
-            "Sleek casino entertainment, gold coins, blue style, 3:4",
+            "Luxury golden coins on premium dark blue velvet, soft studio lighting, high-end fintech aesthetic, photorealistic, 4:5",
+            "Elegant gold coins arrangement, deep navy gradient background, professional product photography, cinematic lighting, 4:5",
+            "Premium golden coins on sophisticated dark fabric, spotlight effect, luxury casino aesthetic, 4:5",
+            "Clean minimalist gold coins composition, navy blue and gold color scheme, modern fintech design, 4:5",
+            "Glittering gold coins, dark blue backdrop, professional studio lighting, luxury aesthetic, 4:5",
         ]
     
     def get_image_prompt_for_topic(self, topic):

@@ -49,7 +49,7 @@ class ImageGenerator:
             payload = {
                 "model": "image-01",
                 "prompt": prompt,
-                "aspect_ratio": "16:9",
+                "aspect_ratio": "4:3",
                 "num_images": 1
             }
             
