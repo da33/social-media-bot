@@ -1,7 +1,7 @@
 """
 社群媒體自動化排程系統
 整合 AI內容生成 + Instagram + Threads + AI生成圖片
-ENI 定制版 - 四人格輪換系統
+ENI 定制版 - waterboy_rix 單一帳號系統
 """
 import schedule
 import time
@@ -15,10 +15,10 @@ from instagram_client import InstagramPublisher
 class SocialMediaScheduler:
     def __init__(self):
         print("🤖 初始化自動化系統...")
-        print("📝 ENI 四人格輪換 + AI 圖片系統")
+        print("📝 waterboy_rix 單一帳號 + AI 圖片系統")
         
         # 初始化 AI 內容生成器
-        self.ai_gen = AIContentGenerator(personas_dir="personas")
+        self.ai_gen = AIContentGenerator()
         
         # 初始化 Threads 發布器（原本的）
         self.threads_bot = InstagramBotOfficial()
@@ -35,7 +35,7 @@ class SocialMediaScheduler:
     def generate_content(self):
         """使用 AI 生成內容"""
         try:
-            posts = self.ai_gen.generate_daily_posts()
+            posts = self.ai_gen.generate_daily_content(3)
             return posts
         except Exception as e:
             print(f"❌ AI 內容生成失敗：{e}")
@@ -45,7 +45,8 @@ class SocialMediaScheduler:
         """備用內容"""
         return [
             {
-                "persona_name": "實話實說型",
+                "style": "直接型",
+                "topic": "出金紀錄",
                 "content": "今天出了一筆，具體金額就不說了。流程走完大概等了一下下，不算久。就這樣。",
                 "link": "https://rggo5269.com/#/ag/win99"
             }
@@ -55,7 +56,8 @@ class SocialMediaScheduler:
         """發布到 Threads（純文字）"""
         try:
             print(f"\n📱 [Threads] 準備發文...")
-            print(f"   人格：{post['persona_name']}")
+            print(f"   話題：{post.get('topic', 'N/A')}")
+            print(f"   風格：{post.get('style', 'N/A')}")
             print(f"   內容：{post['content'][:80]}...")
             
             # 直接發送純文字
@@ -76,8 +78,8 @@ class SocialMediaScheduler:
         """發布到 Instagram（AI 生成的圖片）"""
         try:
             print(f"\n📸 [Instagram] 準備發文...")
-            print(f"   人格：{post['persona_name']}")
             print(f"   話題：{post.get('topic', 'N/A')}")
+            print(f"   風格：{post.get('style', 'N/A')}")
             print(f"   內容：{post['content'][:80]}...")
             
             # 組合 caption
@@ -119,8 +121,8 @@ class SocialMediaScheduler:
             post = posts[2] if len(posts) > 2 else posts[0]
         
         print(f"\n📝 使用內容：")
-        print(f"   人格：{post['persona_name']}")
         print(f"   話題：{post.get('topic', 'N/A')}")
+        print(f"   風格：{post.get('style', 'N/A')}")
         print(f"   內容：\n{post['content'][:200]}...\n")
         
         # 發布到 Threads（純文字）
@@ -158,13 +160,14 @@ class SocialMediaScheduler:
         """運行排程系統"""
         print("\n" + "="*50)
         print("🤖 社群媒體自動化系統")
-        print("   ENI 定制版 - 四人格 + AI 圖片")
+        print("   waterboy_rix 單一帳號 + AI 圖片")
         print("="*50)
         print(f"📅 啟動時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"📱 Threads：純文字發文 ✅")
         print(f"📸 Instagram：AI 生成圖片 + 發文 ✅")
         print(f"🤖 AI 內容生成：MiniMax M2.7 ✅")
-        print(f"👥 人格：實話實說 / 低調專業 / 隨性分享 / 故事敘事")
+        print(f"📝 內容方向：出金 / 平台 / 優惠 / 觀念 / 服務")
+        print(f"🎨 說話風格：直接型 / 專業型 / 輕鬆型 / 故事型")
         print(f"⏰ 發文時間：09:00 / 14:00 / 21:00")
         print("="*50)
         
